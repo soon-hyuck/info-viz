@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,19 +8,82 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
-<h2 style="position: absolute; z-index: 1000; background: rgba(255,255,255,0.8); padding: 10px; margin: 10px;">
+<h2 style="position: absolute; left:60px; z-index: 1000; background: rgba(255,255,255,0.8); padding: 10px; margin: 10px;">
     IND Airport Full Network Visualization (Departures)
 </h2>
+
+<div id="legend" style="
+    position: fixed; 
+    bottom: 20px; 
+    right: 20px;
+    background: white; 
+    padding: 10px; 
+    border-radius: 5px; 
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3); 
+    font-family: Arial, sans-serif; 
+    font-size: 12px;
+    z-index: 1000;">
+    
+    <h4 style="margin: 5px 0; text-align: center;">Departure Delay Legend</h4>
+    
+    <div style="display: flex; align-items: center; margin-bottom: 5px;">
+        <div style="width: 15px; height: 15px; background:#2ECC71; margin-right: 5px; border-radius: 50%;"></div> 
+        0 - 5 min (Green)
+    </div>
+    
+    <div style="display: flex; align-items: center; margin-bottom: 5px;">
+        <div style="width: 15px; height: 15px; background:#F1C40F; margin-right: 5px; border-radius: 50%;"></div> 
+        5 - 10 min (Yellow)
+    </div>
+    
+    <div style="display: flex; align-items: center; margin-bottom: 5px;">
+        <div style="width: 15px; height: 15px; background:#E67E22; margin-right: 5px; border-radius: 50%;"></div> 
+        10 - 20 min (Orange)
+    </div>
+    
+    <div style="display: flex; align-items: center;">
+        <div style="width: 15px; height: 15px; background:#E74C3C; margin-right: 5px; border-radius: 50%;"></div> 
+        20+ min (Red)
+    </div>
+
+</div>
+
 <div id="map" style="width: 100%; height: 100vh;"></div>
 
 <script>
     var map = L.map('map').setView([37.5, -98.0], 4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
+    maxZoom: 20
+    //L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //    attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
     // 공항 노드 추가
-    var airports = [{'id': 'CLT', 'label': 'CLT\n(1576 flights)', 'lat': 35.214, 'lon': -80.9431, 'size': 15.0, 'color': 'orange'}, {'id': 'DFW', 'label': 'DFW\n(1441 flights)', 'lat': 32.8968, 'lon': -97.038, 'size': 13.71510152284264, 'color': 'orange'}, {'id': 'DEN', 'label': 'DEN\n(1260 flights)', 'lat': 39.8617, 'lon': -104.673, 'size': 11.99238578680203, 'color': 'orange'}, {'id': 'PHX', 'label': 'PHX\n(1246 flights)', 'lat': 33.4343, 'lon': -112.012, 'size': 11.859137055837564, 'color': 'orange'}, {'id': 'MCO', 'label': 'MCO\n(1230 flights)', 'lat': 28.4294, 'lon': -81.309, 'size': 11.706852791878172, 'color': 'orange'}, {'id': 'BWI', 'label': 'BWI\n(999 flights)', 'lat': 39.1753, 'lon': -76.6683, 'size': 9.508248730964468, 'color': 'yellow'}, {'id': 'LAS', 'label': 'LAS\n(851 flights)', 'lat': 36.0801, 'lon': -115.152, 'size': 8.099619289340101, 'color': 'orange'}, {'id': 'TPA', 'label': 'TPA\n(773 flights)', 'lat': 27.9755, 'lon': -82.5332, 'size': 7.357233502538071, 'color': 'orange'}, {'id': 'ATL', 'label': 'ATL\n(724 flights)', 'lat': 33.6367, 'lon': -84.4281, 'size': 6.8908629441624365, 'color': 'orange'}, {'id': 'PHL', 'label': 'PHL\n(692 flights)', 'lat': 39.8719, 'lon': -75.2411, 'size': 6.586294416243654, 'color': 'orange'}, {'id': 'DAL', 'label': 'DAL\n(570 flights)', 'lat': 32.8471, 'lon': -96.8518, 'size': 5.425126903553299, 'color': 'orange'}, {'id': 'RSW', 'label': 'RSW\n(569 flights)', 'lat': 26.5362, 'lon': -81.7552, 'size': 5.415609137055838, 'color': 'orange'}, {'id': 'MIA', 'label': 'MIA\n(558 flights)', 'lat': 25.7932, 'lon': -80.2906, 'size': 5.310913705583756, 'color': 'red'}, {'id': 'ORD', 'label': 'ORD\n(518 flights)', 'lat': 41.9786, 'lon': -87.9047, 'size': 4.930203045685279, 'color': 'orange'}, {'id': 'AUS', 'label': 'AUS\n(433 flights)', 'lat': 30.1945, 'lon': -97.6699, 'size': 4.121192893401015, 'color': 'orange'}, {'id': 'HOU', 'label': 'HOU\n(411 flights)', 'lat': 29.6454, 'lon': -95.2789, 'size': 3.911802030456853, 'color': 'yellow'}, {'id': 'FLL', 'label': 'FLL\n(374 flights)', 'lat': 26.0726, 'lon': -80.1527, 'size': 3.559644670050761, 'color': 'orange'}, {'id': 'MCI', 'label': 'MCI\n(322 flights)', 'lat': 39.2976, 'lon': -94.7139, 'size': 3.064720812182741, 'color': 'yellow'}, {'id': 'LAX', 'label': 'LAX\n(286 flights)', 'lat': 33.9425, 'lon': -118.408, 'size': 2.7220812182741114, 'color': 'red'}, {'id': 'SRQ', 'label': 'SRQ\n(157 flights)', 'lat': 27.3954, 'lon': -82.5544, 'size': 1.4942893401015227, 'color': 'orange'}, {'id': 'DCA', 'label': 'DCA\n(121 flights)', 'lat': 38.8522, 'lon': -77.0378, 'size': 1.1516497461928934, 'color': 'orange'}, {'id': 'ECP', 'label': 'ECP\n(53 flights)', 'lat': 30.3571, 'lon': -85.7954, 'size': 0.5044416243654822, 'color': 'yellow'}, {'id': 'SAN', 'label': 'SAN\n(47 flights)', 'lat': 32.7336, 'lon': -117.19, 'size': 0.4473350253807106, 'color': 'orange'}, {'id': 'IND', 'label': 'IND (Indianapolis)', 'lat': 39.7173, 'lon': -86.2944, 'size': 12, 'color': 'black'}];
+    var airports = [{'id': 'CLT', 'label': 'CLT\n(1576 flights)', 'lat': 35.214, 'lon': -80.9431, 'size': 15.0, 'color': 'orange'}, 
+                    {'id': 'DFW', 'label': 'DFW\n(1441 flights)', 'lat': 32.8968, 'lon': -97.038, 'size': 13.71510152284264, 'color': 'orange'}, 
+                    {'id': 'DEN', 'label': 'DEN\n(1260 flights)', 'lat': 39.8617, 'lon': -104.673, 'size': 11.99238578680203, 'color': 'orange'}, 
+                    {'id': 'PHX', 'label': 'PHX\n(1246 flights)', 'lat': 33.4343, 'lon': -112.012, 'size': 11.859137055837564, 'color': 'orange'}, 
+                    {'id': 'MCO', 'label': 'MCO\n(1230 flights)', 'lat': 28.4294, 'lon': -81.309, 'size': 11.706852791878172, 'color': 'orange'}, 
+                    {'id': 'BWI', 'label': 'BWI\n(999 flights)', 'lat': 39.1753, 'lon': -76.6683, 'size': 9.508248730964468, 'color': 'yellow'}, 
+                    {'id': 'LAS', 'label': 'LAS\n(851 flights)', 'lat': 36.0801, 'lon': -115.152, 'size': 8.099619289340101, 'color': 'orange'}, 
+                    {'id': 'TPA', 'label': 'TPA\n(773 flights)', 'lat': 27.9755, 'lon': -82.5332, 'size': 7.357233502538071, 'color': 'orange'}, 
+                    {'id': 'ATL', 'label': 'ATL\n(724 flights)', 'lat': 33.6367, 'lon': -84.4281, 'size': 6.8908629441624365, 'color': 'orange'}, 
+                    {'id': 'PHL', 'label': 'PHL\n(692 flights)', 'lat': 39.8719, 'lon': -75.2411, 'size': 6.586294416243654, 'color': 'orange'}, 
+                    {'id': 'DAL', 'label': 'DAL\n(570 flights)', 'lat': 32.8471, 'lon': -96.8518, 'size': 5.425126903553299, 'color': 'orange'}, 
+                    {'id': 'RSW', 'label': 'RSW\n(569 flights)', 'lat': 26.5362, 'lon': -81.7552, 'size': 5.415609137055838, 'color': 'orange'}, 
+                    {'id': 'MIA', 'label': 'MIA\n(558 flights)', 'lat': 25.7932, 'lon': -80.2906, 'size': 5.310913705583756, 'color': 'red'}, 
+                    {'id': 'ORD', 'label': 'ORD\n(518 flights)', 'lat': 41.9786, 'lon': -87.9047, 'size': 4.930203045685279, 'color': 'orange'}, 
+                    {'id': 'AUS', 'label': 'AUS\n(433 flights)', 'lat': 30.1945, 'lon': -97.6699, 'size': 4.121192893401015, 'color': 'orange'}, 
+                    {'id': 'HOU', 'label': 'HOU\n(411 flights)', 'lat': 29.6454, 'lon': -95.2789, 'size': 3.911802030456853, 'color': 'yellow'}, 
+                    {'id': 'FLL', 'label': 'FLL\n(374 flights)', 'lat': 26.0726, 'lon': -80.1527, 'size': 3.559644670050761, 'color': 'orange'}, 
+                    {'id': 'MCI', 'label': 'MCI\n(322 flights)', 'lat': 39.2976, 'lon': -94.7139, 'size': 3.064720812182741, 'color': 'yellow'}, 
+                    {'id': 'LAX', 'label': 'LAX\n(286 flights)', 'lat': 33.9425, 'lon': -118.408, 'size': 2.7220812182741114, 'color': 'red'}, 
+                    {'id': 'SRQ', 'label': 'SRQ\n(157 flights)', 'lat': 27.3954, 'lon': -82.5544, 'size': 1.4942893401015227, 'color': 'orange'}, 
+                    {'id': 'DCA', 'label': 'DCA\n(121 flights)', 'lat': 38.8522, 'lon': -77.0378, 'size': 1.1516497461928934, 'color': 'orange'}, 
+                    {'id': 'ECP', 'label': 'ECP\n(53 flights)', 'lat': 30.3571, 'lon': -85.7954, 'size': 0.5044416243654822, 'color': 'yellow'}, 
+                    {'id': 'SAN', 'label': 'SAN\n(47 flights)', 'lat': 32.7336, 'lon': -117.19, 'size': 0.4473350253807106, 'color': 'orange'}, 
+                    {'id': 'IND', 'label': 'IND (Indianapolis)', 'lat': 39.7173, 'lon': -86.2944, 'size': 20, 'color': 'black'}];
     airports.forEach(function(airport) {
         L.circleMarker([airport.lat, airport.lon], {
             radius: airport.size,
@@ -32,15 +94,26 @@
     });
 
     // 공항 네트워크 엣지 추가 (IND -> 목적지 공항)
-    var edges = [{'from': 'IND', 'to': 'CLT', 'weight': 7.5}, {'from': 'IND', 'to': 'DFW', 'weight': 6.85755076142132}, {'from': 'IND', 'to': 'DEN', 'weight': 5.996192893401015}, {'from': 'IND', 'to': 'PHX', 'weight': 5.929568527918782}, {'from': 'IND', 'to': 'MCO', 'weight': 5.853426395939086}, {'from': 'IND', 'to': 'BWI', 'weight': 4.754124365482234}, {'from': 'IND', 'to': 'LAS', 'weight': 4.0498096446700504}, {'from': 'IND', 'to': 'TPA', 'weight': 3.6786167512690353}, {'from': 'IND', 'to': 'ATL', 'weight': 3.4454314720812182}, {'from': 'IND', 'to': 'PHL', 'weight': 3.293147208121827}, {'from': 'IND', 'to': 'DAL', 'weight': 2.7125634517766497}, {'from': 'IND', 'to': 'RSW', 'weight': 2.707804568527919}, {'from': 'IND', 'to': 'MIA', 'weight': 2.655456852791878}, {'from': 'IND', 'to': 'ORD', 'weight': 2.4651015228426396}, {'from': 'IND', 'to': 'AUS', 'weight': 2.0605964467005076}, {'from': 'IND', 'to': 'HOU', 'weight': 1.9559010152284264}, {'from': 'IND', 'to': 'FLL', 'weight': 1.7798223350253806}, {'from': 'IND', 'to': 'MCI', 'weight': 1.5323604060913705}, {'from': 'IND', 'to': 'LAX', 'weight': 1.3610406091370557}, {'from': 'IND', 'to': 'SRQ', 'weight': 0.7471446700507614}, {'from': 'IND', 'to': 'DCA', 'weight': 0.5758248730964467}, {'from': 'IND', 'to': 'ECP', 'weight': 0.2522208121827411}, {'from': 'IND', 'to': 'SAN', 'weight': 0.2236675126903553}];
+    var edges = [{'from': 'IND', 'to': 'CLT', 'weight': 7.5}, {'from': 'IND', 'to': 'DFW', 'weight': 6.85755076142132}, 
+    {'from': 'IND', 'to': 'DEN', 'weight': 5.996192893401015}, {'from': 'IND', 'to': 'PHX', 'weight': 5.929568527918782}, 
+    {'from': 'IND', 'to': 'MCO', 'weight': 5.853426395939086}, {'from': 'IND', 'to': 'BWI', 'weight': 4.754124365482234}, 
+    {'from': 'IND', 'to': 'LAS', 'weight': 4.0498096446700504}, {'from': 'IND', 'to': 'TPA', 'weight': 3.6786167512690353}, 
+    {'from': 'IND', 'to': 'ATL', 'weight': 3.4454314720812182}, {'from': 'IND', 'to': 'PHL', 'weight': 3.293147208121827}, 
+    {'from': 'IND', 'to': 'DAL', 'weight': 2.7125634517766497}, {'from': 'IND', 'to': 'RSW', 'weight': 2.707804568527919}, 
+    {'from': 'IND', 'to': 'MIA', 'weight': 2.655456852791878}, {'from': 'IND', 'to': 'ORD', 'weight': 2.4651015228426396}, 
+    {'from': 'IND', 'to': 'AUS', 'weight': 2.0605964467005076}, {'from': 'IND', 'to': 'HOU', 'weight': 1.9559010152284264}, 
+    {'from': 'IND', 'to': 'FLL', 'weight': 1.7798223350253806}, {'from': 'IND', 'to': 'MCI', 'weight': 1.5323604060913705}, 
+    {'from': 'IND', 'to': 'LAX', 'weight': 1.3610406091370557}, {'from': 'IND', 'to': 'SRQ', 'weight': 0.7471446700507614}, 
+    {'from': 'IND', 'to': 'DCA', 'weight': 0.5758248730964467}, {'from': 'IND', 'to': 'ECP', 'weight': 0.2522208121827411}, 
+    {'from': 'IND', 'to': 'SAN', 'weight': 0.2236675126903553}];
     edges.forEach(function(edge) {
         var fromAirport = airports.find(a => a.id === edge.from);
         var toAirport = airports.find(a => a.id === edge.to);
         if (fromAirport && toAirport) {
             L.polyline([[fromAirport.lat, fromAirport.lon], [toAirport.lat, toAirport.lon]], {
-                color: 'blue',
+                color: 'lightblue',
                 weight: edge.weight,
-                opacity: 0.7
+                opacity: 0.3
             }).addTo(map).bindPopup(`<b>${edge.from} → ${edge.to}</b><br>Weight: ${edge.weight}`);
         }
     });
